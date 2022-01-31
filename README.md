@@ -1,7 +1,7 @@
 # pyk4a-bundle
 
 ![CI](https://github.com/etiennedub/pyk4a/workflows/CI/badge.svg)
-[![codecov](https://codecov.io/gh/etiennedub/pyk4a/branch/master/graph/badge.svg)](https://codecov.io/gh/etiennedub/pyk4a)
+[![codecov](https://codecov.io/gh/etiennedub/pyk4a/branch/master/graph/badge.svg)](https://codecov.io/gh/etiennedub/pyk4a) [![PyPI](https://img.shields.io/pypi/v/pyk4a-bundle?style=plastic)](https://pypi.org/project/pyk4a-bundle/)
 
 ![pyk4a](https://github.com/etiennedub/pyk4a/raw/master/figs/pyk4a_logo.png) 
 
