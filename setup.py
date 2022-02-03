@@ -29,6 +29,7 @@ class get_numpy_include:
 
 include_dirs = [get_numpy_include()]
 library_dirs = []
+runtime_library_dirs = []
 
 
 def detect_win32_sdk_include_and_library_dirs() -> Optional[Tuple[str, str]]:
@@ -101,7 +102,7 @@ def bundle_release_libraries(package_data: Dict):
         shutil.copy(binary_dir / "libk4a1.4" / "libdepthengine.so.2.0", package_name, follow_symlinks=True)
 
         # link depth engine
-        library_dirs.insert(0, str(binary_dir / "libk4a1.4"))
+        runtime_library_dirs.insert(0, str(binary_dir / "libk4a1.4"))
     else:
         raise Exception(f"OS {system_name} not supported.")
 
@@ -118,13 +119,14 @@ if "bdist_wheel" in sys.argv:
 
 detect_and_insert_sdk_include_and_library_dirs(include_dirs, library_dirs)
 
-print(f"Lib Dirs: {library_dirs}")
+print(f"Runtime Lib Dirs: {runtime_library_dirs}")
 
 module = Extension('k4a_module',
                    sources=['pyk4a/pyk4a.cpp'],
                    libraries=['k4a', 'k4arecord', 'depthengine'],
                    include_dirs=include_dirs,
-                   library_dirs=library_dirs
+                   library_dirs=library_dirs,
+                   runtime_library_dirs=runtime_library_dirs
                    )
 
 setup(
