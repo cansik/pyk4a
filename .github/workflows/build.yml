@@ -38,6 +38,8 @@ jobs:
           curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
           sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
           env DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y sudo -E apt install -q -y  libk4a1.4-dev
+          # set ld path
+          echo '::set-env name=LD_LIBRARY_PATH::${{ github.workspace }}/pyk4a'
 
       - name: Preqrequisites Windows
         if: matrix.os == 'windows-latest'
