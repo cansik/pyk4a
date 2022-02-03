@@ -101,7 +101,7 @@ def bundle_release_libraries(package_data: Dict):
         shutil.copy(binary_dir / "libk4a1.4" / "libdepthengine.so.2.0", package_name, follow_symlinks=True)
 
         # link depth engine
-        library_dirs.insert(0, binary_dir / "libk4a1.4")
+        library_dirs.insert(0, str(binary_dir / "libk4a1.4"))
     else:
         raise Exception(f"OS {system_name} not supported.")
 
