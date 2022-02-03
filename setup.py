@@ -27,11 +27,6 @@ class get_numpy_include:
         return numpy.get_include()
 
 
-include_dirs = [get_numpy_include()]
-library_dirs = []
-runtime_library_dirs = []
-
-
 def detect_win32_sdk_include_and_library_dirs() -> Optional[Tuple[str, str]]:
     # get program_files path
     for k in ("ProgramFiles", "PROGRAMFILES"):
@@ -100,9 +95,6 @@ def bundle_release_libraries(package_data: Dict):
         shutil.copy(binary_dir / "libk4a.so.1.4", package_name, follow_symlinks=True)
         shutil.copy(binary_dir / "libk4arecord.so.1.4", package_name, follow_symlinks=True)
         shutil.copy(binary_dir / "libk4a1.4" / "libdepthengine.so.2.0", package_name, follow_symlinks=True)
-
-        # link depth engine
-        runtime_library_dirs.insert(0, str(binary_dir / "libk4a1.4"))
     else:
         raise Exception(f"OS {system_name} not supported.")
 
@@ -117,6 +109,9 @@ if "bdist_wheel" in sys.argv:
     print("adding native files to package")
     bundle_release_libraries(package_data)
 
+include_dirs = [get_numpy_include()]
+library_dirs = [os.path.abspath(package_name)]
+runtime_library_dirs = [os.path.abspath(package_name)]
 detect_and_insert_sdk_include_and_library_dirs(include_dirs, library_dirs)
 
 print(f"Runtime Lib Dirs: {runtime_library_dirs}")
