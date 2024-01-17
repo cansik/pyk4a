@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Version Tag'
         required: false
-        default: '1.3.0-bundle'
+        default: '1.5.0-bundle'
 
 
 jobs:
