@@ -72,14 +72,14 @@ class TestSeek:
         capture = playback.get_next_capture()
         assert capture.color is not None
         with pytest.raises(EOFError):
-            playback.get_previouse_capture()
+            playback.get_previous_capture()
 
     @staticmethod
     def test_seek_from_end(playback: PyK4APlayback):
         # TODO fetch capture/data and validate time
         playback.open()
         playback.seek(0, origin=SeekOrigin.END)
-        capture = playback.get_previouse_capture()
+        capture = playback.get_previous_capture()
         assert capture.color is not None
         with pytest.raises(EOFError):
             playback.get_next_capture()
@@ -107,10 +107,10 @@ class TestGetCapture:
         assert capture._calibration is not None  # Issue #81
 
     @staticmethod
-    def test_get_previouse_capture(playback: PyK4APlayback):
+    def test_get_previous_capture(playback: PyK4APlayback):
         playback.open()
         playback.seek(0, origin=SeekOrigin.END)
-        capture = playback.get_previouse_capture()
+        capture = playback.get_previous_capture()
         assert capture is not None
         assert capture.depth is not None
         assert capture.color is not None
@@ -118,3 +118,18 @@ class TestGetCapture:
         assert capture.color_timestamp_usec == 800222
         assert capture.ir_timestamp_usec == 800222
         assert capture._calibration is not None  # Issue #81
+
+
+class TestGetImuSample:
+    @staticmethod
+    def test_get_next_imu_sample(playback: PyK4APlayback):
+        playback.open()
+        imu_sample = playback.get_next_imu_sample()
+        assert imu_sample is not None
+        assert imu_sample["temperature"] is not None
+        assert imu_sample["acc_sample"] is not None
+        assert len(imu_sample["acc_sample"]) == 3
+        assert imu_sample["gyro_sample"] is not None
+        assert len(imu_sample["gyro_sample"]) == 3
+        assert imu_sample["acc_timestamp"] == 336277
+        assert imu_sample["gyro_timestamp"] == 336277

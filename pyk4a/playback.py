@@ -1,4 +1,5 @@
 import sys
+import warnings
 from enum import IntEnum
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
@@ -14,6 +15,7 @@ from .capture import PyK4ACapture
 from .config import FPS, ColorResolution, DepthMode, ImageFormat, WiredSyncMode
 from .errors import K4AException, _verify_error
 from .module import k4a_module
+from .pyk4a import ImuSample
 from .results import Result, StreamResult
 
 
@@ -56,13 +58,13 @@ class PyK4APlayback:
         self.open()
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
     @property
     def path(self) -> Path:
         """
-            Record file path
+        Record file path
         """
         return self._path
 
@@ -70,9 +72,9 @@ class PyK4APlayback:
     def configuration(self) -> Configuration:
         self._validate_is_open()
         if self._configuration is None:
-            res, conf = k4a_module.playback_get_record_configuration(
-                self._handle, self.thread_safe
-            )  # type: int, Tuple[Any,...]
+            res: int
+            conf: Tuple[Any, ...]
+            res, conf = k4a_module.playback_get_record_configuration(self._handle, self.thread_safe)
             _verify_error(res)
             self._configuration = Configuration(
                 color_format=ImageFormat(conf[0]),
@@ -93,7 +95,7 @@ class PyK4APlayback:
     @property
     def length(self) -> int:
         """
-            Record length in usec
+        Record length in usec
         """
         if self._length is None:
             self._validate_is_open()
@@ -130,7 +132,7 @@ class PyK4APlayback:
 
     def open(self) -> None:
         """
-            Open record file
+        Open record file
         """
         if self._handle:
             raise K4AException("Playback already opened")
@@ -142,7 +144,7 @@ class PyK4APlayback:
 
     def close(self):
         """
-            Close record file
+        Close record file
         """
         self._validate_is_open()
         k4a_module.playback_close(self._handle, self.thread_safe)
@@ -150,7 +152,7 @@ class PyK4APlayback:
 
     def seek(self, offset: int, origin: SeekOrigin = SeekOrigin.BEGIN) -> None:
         """
-            Seek playback pointer to specified offset
+        Seek playback pointer to specified offset
         """
         self._validate_is_open()
         result = k4a_module.playback_seek_timestamp(self._handle, self.thread_safe, offset, int(origin))
@@ -168,6 +170,12 @@ class PyK4APlayback:
         )
 
     def get_previouse_capture(self):
+        warnings.warn(
+            "get_previouse_capture() deprecated, please use get_previous_capture() instead", DeprecationWarning
+        )
+        return self.get_previous_capture()
+
+    def get_previous_capture(self):
         self._validate_is_open()
         result, capture_handle = k4a_module.playback_get_previous_capture(self._handle, self.thread_safe)
         self._verify_stream_error(result)
@@ -177,6 +185,12 @@ class PyK4APlayback:
             color_format=self.configuration["color_format"],
             thread_safe=self.thread_safe,
         )
+
+    def get_next_imu_sample(self) -> Optional["ImuSample"]:
+        self._validate_is_open()
+        result, imu_sample = k4a_module.playback_get_next_imu_sample(self._handle, self.thread_safe)
+        self._verify_stream_error(result)
+        return imu_sample
 
     def _validate_is_open(self):
         if not self._handle:

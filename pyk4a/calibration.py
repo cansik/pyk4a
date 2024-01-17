@@ -53,15 +53,19 @@ class Calibration:
         target_camera: CalibrationType,
     ) -> Tuple[float, float, float]:
         """
-            Transform a 3d point of a source coordinate system into a 3d
-            point of the target coordinate system.
-            :param source_point_3d  The 3D coordinates in millimeters representing a point in source_camera.
-            :param source_camera    The current camera.
-            :param target_camera    The target camera.
-            :return                 The 3D coordinates in millimeters representing a point in target camera.
+        Transform a 3d point of a source coordinate system into a 3d
+        point of the target coordinate system.
+        :param source_point_3d  The 3D coordinates in millimeters representing a point in source_camera.
+        :param source_camera    The current camera.
+        :param target_camera    The target camera.
+        :return                 The 3D coordinates in millimeters representing a point in target camera.
         """
         res, target_point_3d = k4a_module.calibration_3d_to_3d(
-            self._calibration_handle, self.thread_safe, source_point_3d, source_camera, target_camera,
+            self._calibration_handle,
+            self.thread_safe,
+            source_point_3d,
+            source_camera,
+            target_camera,
         )
 
         _verify_error(res)
@@ -81,16 +85,21 @@ class Calibration:
         target_camera: CalibrationType,
     ) -> Tuple[float, float, float]:
         """
-            Transform a 3d point of a source coordinate system into a 3d
-            point of the target coordinate system.
-            :param source_pixel_2d    The 2D coordinates in px of source_camera color_image.
-            :param source_depth       Depth in mm
-            :param source_camera      The current camera.
-            :param target_camera      The target camera.
-            :return                   The 3D coordinates in mm representing a point in target camera.
+        Transform a 3d point of a source coordinate system into a 3d
+        point of the target coordinate system.
+        :param source_pixel_2d    The 2D coordinates in px of source_camera color_image.
+        :param source_depth       Depth in mm
+        :param source_camera      The current camera.
+        :param target_camera      The target camera.
+        :return                   The 3D coordinates in mm representing a point in target camera.
         """
         res, valid, target_point_3d = k4a_module.calibration_2d_to_3d(
-            self._calibration_handle, self.thread_safe, source_pixel_2d, source_depth, source_camera, target_camera,
+            self._calibration_handle,
+            self.thread_safe,
+            source_pixel_2d,
+            source_depth,
+            source_camera,
+            target_camera,
         )
 
         _verify_error(res)
@@ -107,7 +116,7 @@ class Calibration:
         target_camera: Optional[CalibrationType] = None,
     ):
         """
-            Transform a 2d pixel to a 3d point of the target coordinate system.
+        Transform a 2d pixel to a 3d point of the target coordinate system.
         """
         if target_camera is None:
             target_camera = source_camera
@@ -120,15 +129,19 @@ class Calibration:
         target_camera: CalibrationType,
     ) -> Tuple[float, float]:
         """
-            Transform a 3d point of a source coordinate system into a 3d
-            point of the target coordinate system.
-            :param source_point_3d    The 3D coordinates in mm of source_camera.
-            :param source_camera      The current camera.
-            :param target_camera      The target camera.
-            :return                   The 3D coordinates in mm representing a point in target camera.
+        Transform a 3d point of a source coordinate system into a 3d
+        point of the target coordinate system.
+        :param source_point_3d    The 3D coordinates in mm of source_camera.
+        :param source_camera      The current camera.
+        :param target_camera      The target camera.
+        :return                   The 3D coordinates in mm representing a point in target camera.
         """
         res, valid, target_px_2d = k4a_module.calibration_3d_to_2d(
-            self._calibration_handle, self.thread_safe, source_point_3d, source_camera, target_camera,
+            self._calibration_handle,
+            self.thread_safe,
+            source_point_3d,
+            source_camera,
+            target_camera,
         )
 
         _verify_error(res)
@@ -144,7 +157,7 @@ class Calibration:
         target_camera: Optional[CalibrationType] = None,
     ):
         """
-            Transform a 3d point to a 2d pixel of the target coordinate system.
+        Transform a 3d point to a 2d pixel of the target coordinate system.
         """
         if target_camera is None:
             target_camera = source_camera
@@ -183,3 +196,18 @@ class Calibration:
             raise ValueError("Unknown camera calibration type")
 
         return np.array([params[4], params[5], params[13], params[12], *params[6:10]])
+
+    def get_extrinsic_parameters(
+        self, source_camera: CalibrationType, target_camera: CalibrationType
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        The extrinsic parameters allow 3D coordinate conversions between depth camera, color camera, the IMU's gyroscope and accelerometer.
+        """
+        params = k4a_module.calibration_get_extrinsics(
+            self._calibration_handle, self.thread_safe, source_camera, target_camera
+        )
+
+        rotation = np.reshape(np.array(params[0]), [3, 3])
+        translation = np.reshape(np.array(params[1]), [1, 3]) / 1000  # Millimeter to meter conversion
+
+        return rotation, translation
