@@ -48,7 +48,7 @@ jobs:
           
           # installing deb packages
           wget https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.2_amd64.deb -O libk4a-dev.deb
-          wget https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.2_amd64.deb libk4a.deb
+          wget https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.2_amd64.deb -O libk4a.deb
           
           sudo dpkg -i libk4a-dev.deb
           sudo dpkg -i libk4a.deb
