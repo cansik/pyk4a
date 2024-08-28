@@ -39,23 +39,12 @@ jobs:
           sudo apt install -q -y curl software-properties-common build-essential
           # sudo apt install -y libgl1-mesa-dev libsoundio-dev libvulkan-dev libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libusb-1.0-0-dev libssl-dev libudev-dev mesa-common-dev uuid-dev
           
-          # Backup the current sources list
-          sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
-          
-          # Switch to Ubuntu 20.04 (Focal) sources
-          echo "Switching to Ubuntu 20.04 sources..."
-          sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu focal main" > /etc/apt/sources.list'
-          
-          # Update package lists and install libsoundio1
-          sudo apt update
-          sudo apt install -y libsoundio1
-          
-          # Restore the original sources list
-          echo "Restoring the original sources list..."
-          sudo mv /etc/apt/sources.list.backup /etc/apt/sources.list
-          
-          # Update package lists again to reflect the original sources
-          sudo apt update
+          # install libsoundio1
+          sudo apt-add-repository -y -n 'deb http://archive.ubuntu.com/ubuntu focal main'
+          sudo apt-add-repository -y 'deb http://archive.ubuntu.com/ubuntu focal universe'
+          sudo apt-get install -y libsoundio1
+          sudo apt-add-repository -r -y -n 'deb http://archive.ubuntu.com/ubuntu focal universe'
+          sudo apt-add-repository -r -y 'deb http://archive.ubuntu.com/ubuntu focal main'
           
           # installing deb packages
           wget https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.2_amd64.deb -O libk4a-dev.deb
@@ -63,9 +52,6 @@ jobs:
           
           sudo dpkg -i libk4a-dev.deb
           sudo dpkg -i libk4a.deb
-
-
-
 
       - name: Preqrequisites Windows
         if: matrix.os == 'windows-latest'
