@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest' ] # 'ubuntu-latest' "ubuntu-18.04" "windows-latest"
+        os: [ 'ubuntu-latest', 'windows-latest' ] # 'ubuntu-latest' "ubuntu-latest" "windows-latest"
         python-version: [ '3.6', '3.7', '3.8', '3.9', '3.10', '3.11', '3.12' ]
 
     runs-on: ${{ matrix.os }}
@@ -32,8 +32,8 @@ jobs:
           cd ${{ github.workspace }}
 
       # install prerequisites
-      - name: Preqrequisites Ubuntu-18.04
-        if: matrix.os == 'ubuntu-18.04'
+      - name: Preqrequisites ubuntu-latest
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt install -q -y curl software-properties-common build-essential
           curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
@@ -61,8 +61,8 @@ jobs:
           ls dist
 
       # fix many-linux
-      - name: Preqrequisites Ubuntu-18.04
-        if: matrix.os == 'ubuntu-18.04'
+      - name: Preqrequisites ubuntu-latest
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pip install auditwheel
 
