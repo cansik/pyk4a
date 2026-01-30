@@ -541,32 +541,52 @@ k4a_result_t k4a_image_to_numpy(k4a_image_t *img_src, PyArrayObject **img_dst) {
   return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_result_t numpy_to_k4a_image(PyArrayObject *img_src, k4a_image_t *img_dst, k4a_image_format_t format) {
+k4a_result_t numpy_to_k4a_image(PyArrayObject *img_src,
+                                k4a_image_t   *img_dst,
+                                k4a_image_format_t format)
+{
+    /* get shape[] and data pointer via the public C-API */
+    npy_intp *dims        = PyArray_DIMS(img_src);
+    int       height_pix  = (int)dims[0];
+    int       width_pix   = (int)dims[1];
+    uint8_t  *data        = (uint8_t *)PyArray_DATA(img_src);
+    size_t    buffer_size = (size_t)PyArray_NBYTES(img_src);
 
-  int width_pixels = img_src->dimensions[1];
-  int height_pixels = img_src->dimensions[0];
-  int pixel_size;
+    int pixel_size;
+    switch (format)
+    {
+      case K4A_IMAGE_FORMAT_DEPTH16:
+      case K4A_IMAGE_FORMAT_CUSTOM16:
+      case K4A_IMAGE_FORMAT_IR16:
+        pixel_size = sizeof(uint16_t);
+        break;
 
-  switch (format) {
-  case K4A_IMAGE_FORMAT_DEPTH16:
-  case K4A_IMAGE_FORMAT_CUSTOM16:
-  case K4A_IMAGE_FORMAT_IR16:
-    pixel_size = (int)sizeof(uint16_t);
-    break;
-  case K4A_IMAGE_FORMAT_COLOR_BGRA32:
-    pixel_size = (int)sizeof(uint32_t);
-    break;
-  case K4A_IMAGE_FORMAT_CUSTOM8:
-    pixel_size = (int)sizeof(uint8_t);
-    break;
-  default:
-    // Not supported
-    return K4A_RESULT_FAILED;
-  }
+      case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        pixel_size = sizeof(uint32_t);
+        break;
 
-  return k4a_image_create_from_buffer(format, width_pixels, height_pixels, width_pixels * pixel_size,
-                                      (uint8_t *)img_src->data, width_pixels * height_pixels * pixel_size, NULL, NULL,
-                                      img_dst);
+      case K4A_IMAGE_FORMAT_CUSTOM8:
+        pixel_size = sizeof(uint8_t);
+        break;
+
+      default:
+        /* unsupported format */
+        return K4A_RESULT_FAILED;
+    }
+
+    int stride_bytes_per_row = width_pix * pixel_size;
+
+    return k4a_image_create_from_buffer(
+        format,
+        width_pix,
+        height_pix,
+        stride_bytes_per_row,
+        data,
+        buffer_size,
+        NULL,    /* no custom free callback */
+        NULL,    /* no callback context */
+        img_dst
+    );
 }
 
 static PyObject *color_image_get_exposure_usec(PyObject *self, PyObject *args) {
