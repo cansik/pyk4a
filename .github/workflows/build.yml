@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Version Tag'
         required: false
-        default: '1.5.0-bundle'
+        default: '1.5.0.1-bundle'
 
 jobs:
   build:
@@ -84,7 +84,7 @@ jobs:
           wheel_file="${files[0]}"
 
           # repaire wheel
-          auditwheel repair $wheel_file --plat manylinux_2_35_x86_64 -w dist
+          auditwheel repair $wheel_file --plat manylinux_2_39_x86_64 -w dist
 
           # remove original wheel
           rm $wheel_file

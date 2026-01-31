@@ -118,14 +118,28 @@ if major >= 2:
     define_macros.append(("NPY_TARGET_VERSION", "NPY_1_13_API_VERSION"))
 
 include_dirs = [get_numpy_include()]
+# Add numpy 2.0 config include path if needed
+try:
+    import numpy
+    if numpy.__version__.startswith("2."):
+        include_dirs.append(os.path.join(numpy.get_include(), "numpy"))
+except ImportError:
+    pass
+
 library_dirs = []
 detect_and_insert_sdk_include_and_library_dirs(include_dirs, library_dirs)
+
+extra_compile_args = []
+if sys.platform == "win32":
+    extra_compile_args.append("/experimental:c11atomics")
+
 module = Extension('k4a_module',
                    sources=['pyk4a/pyk4a.cpp'],
                    libraries=['k4a', 'k4arecord'],
                    include_dirs=include_dirs,
                    library_dirs=library_dirs,
                    define_macros=define_macros,
+                   extra_compile_args=extra_compile_args,
                    )
 
 setup(
